@@ -9,26 +9,51 @@ const router = express.Router();
  * @desc Get all orders (Admin only)
  * @route GET /api/admin/orders
  */
+// GET /api/admin/orders?status=paid&startDate=2025-08-01&endDate=2025-08-08&page=1&limit=10
 router.get("/", protect, isAdmin, async (req, res) => {
-  const page = parseInt(req.query.page) || 1;
-  const limit = parseInt(req.query.limit) || 10;
-  const skip = (page - 1) * limit;
+  try {
+  const { status, startDate, endDate, page = 1, limit = 10, sort } = req.query;
 
-  const orders = await Order.find()
-    .populate("user", "name email")
-    .populate("items.product", "name price")
-    .skip(skip)
-    .limit(limit)
-    .sort({ createdAt: -1 });
+    let query = {};
 
-  const total = await Order.countDocuments();
+    // Filter by paymentStatus
+    if (status) {
+      query.paymentStatus = status;
+    }
 
-  res.json({
-    orders,
-    total,
-    page,
-    pages: Math.ceil(total / limit)
-  });
+    // Filter by date range
+    if (startDate || endDate) {
+      query.createdAt = {};
+      if (startDate) query.createdAt.$gte = new Date(startDate);
+      if (endDate) query.createdAt.$lte = new Date(endDate);
+    }
+
+    const skip = (page - 1) * limit;
+
+    // Sorting
+    let sortOption = { createdAt: -1 }; // default newest first
+    if (sort === "oldest") sortOption = { createdAt: 1 };
+    if (sort === "total_asc") sortOption = { total: 1 };
+    if (sort === "total_desc") sortOption = { total: -1 };
+
+    const orders = await Order.find(query)
+      .populate("user", "name email")
+      .populate("items.product", "name price")
+      .skip(skip)
+      .limit(Number(limit))
+      .sort(sortOption);
+
+    const total = await Order.countDocuments(query);
+
+    res.json({
+      orders,
+      total,
+      page: Number(page),
+      pages: Math.ceil(total / limit)
+    });
+  } catch (err) {
+    res.status(500).json({ message: err.message });
+  }
 });
 
 /**

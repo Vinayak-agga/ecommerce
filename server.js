@@ -6,6 +6,7 @@ import productRoutes from "./routes/productRoutes.js";
 import cartRoutes from "./routes/cartRoutes.js";
 import orderRoutes from "./routes/orderRoutes.js";
 import adminOrderRoutes from "./routes/adminOrderRoutes.js";
+import adminUserRoutes from "./routes/adminUserRoutes.js";
 import authRoutes from "./routes/authRoutes.js";
 dotenv.config();
 
@@ -33,7 +34,9 @@ mongoose.connect(process.env.MONGODB_URI, {
 app.use("/api/products", productRoutes);
 app.use("/api/cart", cartRoutes);
 app.use("/api/orders", orderRoutes);
+
 app.use("/api/admin/orders", adminOrderRoutes);
+app.use("/api/admin/users", adminUserRoutes);
 
 
 // Root route for health check

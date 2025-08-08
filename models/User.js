@@ -5,7 +5,7 @@ const userSchema = new mongoose.Schema(
   {
     username: {
       type: String,
-      required: [true, "Username is required"],
+      required: [false, "Username is required"],
       unique: true,
       trim: true,
       minlength: [3, "Username must be at least 3 characters long"],
@@ -30,6 +30,10 @@ const userSchema = new mongoose.Schema(
       type: String,
       enum: ["user", "admin"],
       default: "user",
+    },
+    isActive: {
+      type: Boolean,
+      default: true,
     },
     resetPasswordToken: String, // For future password reset feature
     resetPasswordExpire: Date,

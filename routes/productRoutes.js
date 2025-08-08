@@ -49,19 +49,54 @@ router.post("/", protect, isAdmin, async (req, res) => {
  * @desc    Get all products
  * @access  Public
  */
+// GET /api/products?search=phone&category=Electronics&minPrice=100&maxPrice=1000&page=1&limit=10
 router.get("/", async (req, res) => {
   try {
-    const products = await Product.find();
-    res.status(200).json({
-      success: true,
-      count: products.length,
-      data: products,
+  const { search, category, minPrice, maxPrice, page = 1, limit = 10, sort } = req.query;
+
+    let query = {};
+
+    // Search by name
+    if (search) {
+      query.name = { $regex: search, $options: "i" };
+    }
+
+    // Filter by category
+    if (category) {
+      query.category = category;
+    }
+
+    // Filter by price range
+    if (minPrice || maxPrice) {
+      query.price = {};
+      if (minPrice) query.price.$gte = Number(minPrice);
+      if (maxPrice) query.price.$lte = Number(maxPrice);
+    }
+
+    const skip = (page - 1) * limit;
+
+    // Sorting
+    let sortOption = { createdAt: -1 }; // default newest first
+    if (sort === "price_asc") sortOption = { price: 1 };
+    if (sort === "price_desc") sortOption = { price: -1 };
+    if (sort === "name_asc") sortOption = { name: 1 };
+    if (sort === "name_desc") sortOption = { name: -1 };
+
+    const products = await Product.find(query)
+      .skip(skip)
+      .limit(Number(limit))
+      .sort(sortOption);
+
+    const total = await Product.countDocuments(query);
+
+    res.json({
+      products,
+      total,
+      page: Number(page),
+      pages: Math.ceil(total / limit)
     });
-  } catch (error) {
-    res.status(500).json({
-      success: false,
-      message: error.message,
-    });
+  } catch (err) {
+    res.status(500).json({ message: err.message });
   }
 });
 
