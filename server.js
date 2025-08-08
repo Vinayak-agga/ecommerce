@@ -2,8 +2,10 @@ import express from "express";
 import mongoose from "mongoose";
 import dotenv from "dotenv";
 import cors from "cors";
-import productRoutes from "./routes/productRoutes.js"; // path to your router
-import bodyParser from "body-parser";
+import productRoutes from "./routes/productRoutes.js";
+import cartRoutes from "./routes/cartRoutes.js";
+import orderRoutes from "./routes/orderRoutes.js";
+import adminOrderRoutes from "./routes/adminOrderRoutes.js";
 import authRoutes from "./routes/authRoutes.js";
 dotenv.config();
 
@@ -26,7 +28,12 @@ mongoose.connect(process.env.MONGODB_URI, {
 });
 
 // Use product routes
+
+
 app.use("/api/products", productRoutes);
+app.use("/api/cart", cartRoutes);
+app.use("/api/orders", orderRoutes);
+app.use("/api/admin/orders", adminOrderRoutes);
 
 
 // Root route for health check

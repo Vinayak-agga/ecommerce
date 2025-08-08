@@ -1,6 +1,7 @@
 import express from "express";
 import Product from "../models/Product.js";
-import { protect, adminOnly } from "../middleware/authMiddleware.js";
+import { protect } from "../middleware/authMiddleware.js";
+import { isAdmin } from "../middleware/adminMiddleware.js";
 
 const router = express.Router();
 
@@ -9,7 +10,8 @@ const router = express.Router();
  * @desc    Create a new product
  * @access  Admin only
  */
-router.post("/", protect, adminOnly, async (req, res) => {
+// ...existing code...
+router.post("/", protect, isAdmin, async (req, res) => {
   try {
     const { name, price, description, category, stock } = req.body;
 
@@ -68,7 +70,8 @@ router.get("/", async (req, res) => {
  * @desc    Update a product by ID
  * @access  Admin only
  */
-router.put("/:id", protect, adminOnly, async (req, res) => {
+// ...existing code...
+router.put("/:id", protect, isAdmin, async (req, res) => {
   try {
     const updatedProduct = await Product.findByIdAndUpdate(
       req.params.id,
@@ -100,7 +103,8 @@ router.put("/:id", protect, adminOnly, async (req, res) => {
  * @desc    Delete a product by ID
  * @access  Admin only
  */
-router.delete("/:id", protect, adminOnly, async (req, res) => {
+// ...existing code...
+router.delete("/:id", protect, isAdmin, async (req, res) => {
   try {
     const deletedProduct = await Product.findByIdAndDelete(req.params.id);
 
